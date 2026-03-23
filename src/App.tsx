@@ -14,6 +14,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import { SUGGESTED_ITEMS } from './data/constants';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
+import { hashPassword, generateSalt } from './utils/crypto';
 
 export default function App() {
   const { t, i18n } = useTranslation();
@@ -165,6 +166,19 @@ export default function App() {
     await db.profiles.put({ ...updatedProfile, ownerId: activeUserId });
   };
 
+  const handleUpdatePassword = async (password: string) => {
+    if (!activeUserId || isGuest) return;
+    try {
+      const salt = generateSalt();
+      const passwordHash = await hashPassword(password, salt);
+      await db.users.update(activeUserId, { passwordHash, salt });
+      toast.success(t('profile.passwordUpdated', 'Password updated successfully!'));
+    } catch (error) {
+      console.error('Failed to update password:', error);
+      toast.error(t('profile.passwordUpdateFailed', 'Failed to update password.'));
+    }
+  };
+
   const tabs: ('landing' | 'trips' | 'inventory' | 'profile')[] = ['landing', 'trips', 'inventory', 'profile'];
 
   const handleExportData = async () => {
@@ -208,17 +222,23 @@ export default function App() {
           throw new Error('Invalid backup file format');
         }
 
-        await Promise.all([
-          ...data.trips.map((t: Trip) => db.trips.put({ ...t, ownerId: activeUserId })),
-          ...data.inventory.map((i: InventoryItem) => db.inventory.put({ ...i, ownerId: activeUserId })),
-          ...data.customLists.map((l: CustomList) => db.customLists.put({ ...l, ownerId: activeUserId }))
-        ]);
+        // Use bulkPut for better performance and to handle large datasets
+        // We ensure ownerId is set to the current active user for all imported items
+        await db.transaction('rw', db.trips, db.inventory, db.customLists, db.profiles, async () => {
+          await Promise.all([
+            ...data.trips.map((t: Trip) => db.trips.put({ ...t, ownerId: activeUserId })),
+            ...data.inventory.map((i: InventoryItem) => db.inventory.put({ ...i, ownerId: activeUserId })),
+            ...data.customLists.map((l: CustomList) => db.customLists.put({ ...l, ownerId: activeUserId }))
+          ]);
 
-        if (data.profile) {
-          await db.profiles.put({ ...data.profile, ownerId: activeUserId });
-        }
+          if (data.profile) {
+            await db.profiles.put({ ...data.profile, ownerId: activeUserId });
+          }
+        });
 
         toast.success(t('profile.importSuccess', 'Data imported successfully!'));
+        // Reset the input so the same file can be imported again if needed
+        if (e.target) e.target.value = '';
       } catch (error) {
         console.error('Import failed:', error);
         toast.error(t('profile.importFailed', 'Failed to import data. Check file format.'));
@@ -342,10 +362,10 @@ export default function App() {
                 </div>
                 <div>
                   <p className="text-sm text-amber-900 dark:text-amber-100 font-bold">
-                    {t('auth.guestWarningShort', 'Ephemeral Session')}
+                    {t('auth.guestWarningShort', 'Temporary Session')}
                   </p>
                   <p className="text-xs text-amber-700 dark:text-amber-300">
-                    {t('auth.guestWarningDesc', 'Data will be purged on exit. Create an account to save progress.')}
+                    {t('auth.guestWarningDesc', 'Data will be purged on exit. Create a local account to save progress.')}
                   </p>
                 </div>
               </div>
@@ -415,6 +435,7 @@ export default function App() {
                 profile={currentProfile} 
                 inventory={inventory} 
                 onUpdateProfile={async (p) => updateProfile(p)} 
+                onUpdatePassword={handleUpdatePassword}
                 onSignOut={signOut} 
                 onDeleteAccount={deleteAccount} 
                 onExportData={handleExportData}

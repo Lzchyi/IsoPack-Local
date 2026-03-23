@@ -120,10 +120,10 @@ export default function AuthView({ onAuthSuccess, onGuestMode }: Props) {
           >
             <Luggage className="w-10 h-10" />
           </motion.div>
-          <h1 className="text-4xl font-black tracking-tighter text-stone-900 dark:text-white mb-2 uppercase italic">IsoPack</h1>
+          <h1 className="text-4xl font-black tracking-tighter text-stone-900 dark:text-white mb-2 italic">IsoPack</h1>
           <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 font-mono text-xs uppercase tracking-widest">
             <ShieldCheck className="w-4 h-4" />
-            <span>Local Sovereignty Protocol</span>
+            <span>{t('auth.localSovereignty', 'Your Data. Your Device. Your Journey.')}</span>
           </div>
         </div>
 
@@ -140,7 +140,7 @@ export default function AuthView({ onAuthSuccess, onGuestMode }: Props) {
                 <div className="flex gap-3">
                   <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
                   <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
-                    {t('auth.guestWarning', 'Guest Mode is ephemeral. All data will be purged from this device once you sign out.')}
+                    {t('auth.guestWarning', 'Guest Mode is temporary. All data will be purged from this device once you sign out.')}
                   </p>
                 </div>
               </div>
@@ -199,7 +199,7 @@ export default function AuthView({ onAuthSuccess, onGuestMode }: Props) {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="w-full pl-12 pr-4 py-4 bg-stone-50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-stone-900 dark:text-white"
-                      placeholder="traveler_01"
+                      placeholder={t('auth.traveler', 'Alex')}
                       required
                     />
                   </div>
@@ -247,7 +247,7 @@ export default function AuthView({ onAuthSuccess, onGuestMode }: Props) {
                   onClick={() => setMode('guest-info')}
                   className="text-emerald-600 dark:text-emerald-400 text-sm font-bold hover:underline transition-all"
                 >
-                  {t('auth.useGuest', 'Use Guest Mode (Ephemeral)')}
+                  {t('auth.useGuest', 'Use Guest Mode (Temporary)')}
                 </button>
               </div>
             </motion.div>

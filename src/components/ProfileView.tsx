@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, InventoryItem } from '../types';
-import { User, Save, LogOut, ShieldCheck, Globe, Shield, X, Trash2, Info, Moon, Sun, Camera, Edit2, Download, Upload, Database } from 'lucide-react';
+import { User, Save, LogOut, ShieldCheck, Globe, Shield, X, Trash2, Info, Moon, Sun, Camera, Pencil, Download, Upload, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ConfirmationModal from './ConfirmationModal';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -11,21 +12,25 @@ interface Props {
   profile: UserProfile | null;
   inventory: InventoryItem[];
   onUpdateProfile: (profile: UserProfile) => Promise<void>;
+  onUpdatePassword?: (password: string) => Promise<void>;
   onSignOut: () => Promise<void>;
   onDeleteAccount: () => Promise<void>;
   onExportData: () => void;
   onImportData: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function ProfileView({ profile, inventory, onUpdateProfile, onSignOut, onDeleteAccount, onExportData, onImportData }: Props) {
+export default function ProfileView({ profile, inventory, onUpdateProfile, onUpdatePassword, onSignOut, onDeleteAccount, onExportData, onImportData }: Props) {
   const { t, i18n } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useDarkMode();
   const [name, setName] = useState(profile?.name || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isPhotoMenuOpen, setIsPhotoMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const mustBringItems = inventory.filter(item => item.isMaster);
@@ -114,7 +119,7 @@ export default function ProfileView({ profile, inventory, onUpdateProfile, onSig
       <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 p-6 sm:p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="relative group">
-            <div className="w-32 h-32 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 border-4 border-white dark:border-stone-800 shadow-md overflow-hidden">
+            <div className="w-32 h-32 bg-emerald-100 dark:bg-emerald-900/30 rounded-3xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 border-4 border-white dark:border-stone-800 shadow-md overflow-hidden">
               {profile?.avatarUrl ? (
                 <img 
                   src={profile.avatarUrl} 
@@ -129,23 +134,56 @@ export default function ProfileView({ profile, inventory, onUpdateProfile, onSig
               )}
             </div>
             
-            <div className="absolute bottom-0 right-0 flex gap-2">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg transition-all transform hover:scale-110"
-                title={t('profile.changePhoto', 'Change Photo')}
-              >
-                <Camera className="w-5 h-5" />
-              </button>
-              {profile?.avatarUrl && (
+            <div className="absolute -bottom-2 -right-2 flex gap-2">
+              <div className="relative">
                 <button
-                  onClick={handleDeleteImage}
-                  className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all transform hover:scale-110"
-                  title={t('profile.deletePhoto', 'Delete Photo')}
+                  onClick={() => setIsPhotoMenuOpen(!isPhotoMenuOpen)}
+                  className="p-2 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 rounded-xl shadow-lg border border-stone-100 dark:border-stone-700 hover:scale-110 transition-transform"
+                  title={t('profile.editPhoto', 'Edit Photo')}
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Pencil className="w-4 h-4" />
                 </button>
-              )}
+
+                <AnimatePresence>
+                  {isPhotoMenuOpen && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-10" 
+                        onClick={() => setIsPhotoMenuOpen(false)} 
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        className="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-100 dark:border-stone-700 overflow-hidden z-20"
+                      >
+                        <button
+                          onClick={() => {
+                            fileInputRef.current?.click();
+                            setIsPhotoMenuOpen(false);
+                          }}
+                          className="w-full px-4 py-3 text-left text-sm font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 transition-colors"
+                        >
+                          <Camera className="w-4 h-4" />
+                          {t('profile.uploadPhoto', 'Upload Photo')}
+                        </button>
+                        {profile?.avatarUrl && (
+                          <button
+                            onClick={() => {
+                              handleDeleteImage();
+                              setIsPhotoMenuOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            {t('profile.removePhoto', 'Remove Photo')}
+                          </button>
+                        )}
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
             <input
               type="file"
@@ -155,15 +193,39 @@ export default function ProfileView({ profile, inventory, onUpdateProfile, onSig
               className="hidden"
             />
           </div>
-          <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
-            {t('profile.clickToChange', 'Click the camera to update your photo')}
-          </p>
         </div>
 
         {isEditing ? (
-          <form onSubmit={handleSave} className="space-y-6">
+          <form 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!name.trim() || !profile) return;
+
+              try {
+                if (newPassword) {
+                  if (newPassword !== confirmPassword) {
+                    toast.error(t('auth.passwordMismatch', 'Passwords do not match.'));
+                    return;
+                  }
+                  if (onUpdatePassword) {
+                    await onUpdatePassword(newPassword);
+                  }
+                }
+                await onUpdateProfile({
+                  ...profile,
+                  name: name.trim()
+                });
+                setIsEditing(false);
+                setNewPassword('');
+                setConfirmPassword('');
+              } catch (err) {
+                console.error('Failed to update profile', err);
+              }
+            }} 
+            className="space-y-6"
+          >
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700 dark:text-stone-300">{t('inventory.yourName')}</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-stone-400 ml-1">{t('inventory.yourName')}</label>
               <input
                 type="text"
                 value={name}
@@ -172,10 +234,42 @@ export default function ProfileView({ profile, inventory, onUpdateProfile, onSig
                 required
               />
             </div>
+
+            <div className="pt-4 border-t border-stone-100 dark:border-stone-700 space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-stone-400 ml-1">{t('profile.changePassword', 'Change Local Password')}</h4>
+              
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-stone-500 ml-1">{t('profile.newPassword', 'New Password')}</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-stone-500 ml-1">{t('profile.confirmPassword', 'Confirm New Password')}</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all dark:text-white"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => setIsEditing(false)}
+                onClick={() => {
+                  setIsEditing(false);
+                  setName(profile?.name || '');
+                  setNewPassword('');
+                  setConfirmPassword('');
+                }}
                 className="flex-1 px-6 py-3 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 font-medium rounded-xl transition-colors"
               >
                 {t('common.cancel')}

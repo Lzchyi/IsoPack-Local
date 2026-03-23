@@ -12,7 +12,7 @@ export default function OnboardingView({ onComplete }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalName = name.trim() || t('auth.traveler', 'Traveler');
+    const finalName = name.trim() || t('auth.traveler', 'Alex');
     onComplete(finalName);
   };
 
@@ -26,7 +26,7 @@ export default function OnboardingView({ onComplete }: Props) {
           <h1 className="text-4xl font-black tracking-tighter uppercase italic">{t('app.name', 'IsoPack')}</h1>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-bold uppercase tracking-widest">
             <ShieldCheck className="w-3 h-3" />
-            {t('auth.localSovereignty', 'Local Sovereignty Protocol')}
+            {t('auth.localSovereignty', 'Your Data. Your Device. Your Journey.')}
           </div>
         </div>
 
@@ -49,7 +49,7 @@ export default function OnboardingView({ onComplete }: Props) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-4 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all dark:text-white text-lg font-medium"
-                placeholder={t('auth.traveler', 'Traveler')}
+                placeholder={t('auth.traveler', 'Alex')}
                 autoFocus
                 required
               />
