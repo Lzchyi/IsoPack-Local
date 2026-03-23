@@ -7,14 +7,13 @@ import { useDarkMode } from '../hooks/useDarkMode';
 
 interface Props {
   profile: UserProfile | null;
-  isGuest: boolean;
   inventory: InventoryItem[];
   onUpdateProfile: (profile: UserProfile) => Promise<void>;
   onSignOut: () => Promise<void>;
   onDeleteAccount: () => Promise<void>;
 }
 
-export default function ProfileView({ profile, isGuest, inventory, onUpdateProfile, onSignOut, onDeleteAccount }: Props) {
+export default function ProfileView({ profile, inventory, onUpdateProfile, onSignOut, onDeleteAccount }: Props) {
   const { t, i18n } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useDarkMode();
   const [name, setName] = useState(profile?.name || '');
@@ -69,12 +68,6 @@ export default function ProfileView({ profile, isGuest, inventory, onUpdateProfi
           <h2 className="text-2xl font-semibold">{t('profile.title')}</h2>
           <p className="text-stone-500 mt-1">{t('app.tagline')}</p>
         </div>
-        {isGuest && (
-          <div className="bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-lg flex items-center gap-2 text-amber-700 text-xs font-medium">
-            <Shield className="w-3.5 h-3.5" />
-            {t('auth.guestWarning')}
-          </div>
-        )}
       </div>
 
       <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 p-6 sm:p-8">
@@ -120,9 +113,6 @@ export default function ProfileView({ profile, isGuest, inventory, onUpdateProfi
               <p className="text-stone-500 dark:text-stone-400 mt-1">
                 {t('profile.joined')} {new Date(profile?.joinedAt || Date.now()).toLocaleDateString()}
               </p>
-              {isGuest && (
-                <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 font-medium">{t('auth.guestWarning')}</p>
-              )}
             </div>
             <div className="pt-6 border-t border-stone-100 dark:border-stone-700 flex flex-col sm:flex-row gap-3 justify-center">
               <button
@@ -136,7 +126,7 @@ export default function ProfileView({ profile, isGuest, inventory, onUpdateProfi
                 className="px-6 py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
-                {isGuest ? t('common.cancel') : t('auth.signOut')}
+                {t('auth.signOut')}
               </button>
             </div>
           </div>

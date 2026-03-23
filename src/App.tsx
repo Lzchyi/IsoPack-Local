@@ -6,6 +6,7 @@ import TripListView from './components/TripListView';
 import TripDetailView from './components/TripDetailView';
 import ProfileView from './components/ProfileView';
 import LandingView from './components/LandingView';
+import OnboardingView from './components/OnboardingView';
 import { Luggage, Box, Plane, User, Globe, Home } from 'lucide-react';
 import { motion, PanInfo } from 'motion/react';
 import { Toaster } from 'react-hot-toast';
@@ -17,6 +18,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<'landing' | 'trips' | 'inventory' | 'profile'>('landing');
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [allEssentials, setAllEssentials] = useState<InventoryItem[]>(() => {
     const saved = localStorage.getItem('packwise_essentials_v2');
     return saved ? JSON.parse(saved) : (SUGGESTED_ITEMS['All Essentials'] || []);
@@ -24,9 +26,6 @@ export default function App() {
 
   const trips = useLiveQuery(() => db.trips.toArray()) || [];
   const inventory = useLiveQuery(() => db.inventory.toArray()) || [];
-  // Need to add customLists to db.ts
-  // const customLists = useLiveQuery(() => db.customLists.toArray()) || [];
-  // For now, let's keep customLists in localStorage or add it to db.ts
   const [customLists, setCustomLists] = useState<CustomList[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
@@ -43,16 +42,8 @@ export default function App() {
         if (profile.language) {
           i18n.changeLanguage(profile.language);
         }
-      } else {
-        const defaultProfile: UserProfile = {
-          uid: 'local',
-          name: t('auth.traveler'),
-          joinedAt: Date.now(),
-          language: i18n.language as 'en-GB' | 'zh-CN'
-        };
-        localStorage.setItem('packwise_profile', JSON.stringify(defaultProfile));
-        setProfile(defaultProfile);
       }
+      setIsInitializing(false);
     };
     initProfile();
 
@@ -152,6 +143,14 @@ export default function App() {
     localStorage.setItem('packwise_profile', JSON.stringify(updatedProfile));
   };
 
+  if (isInitializing) {
+    return null;
+  }
+
+  if (!profile) {
+    return <OnboardingView onComplete={updateProfile} />;
+  }
+
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 font-sans selection:bg-emerald-200 flex flex-col sm:flex-row">
       <Toaster position="top-center" />
@@ -241,7 +240,6 @@ export default function App() {
                 trip={trips.find(t => t.id === activeTripId)!} 
                 inventory={inventory}
                 profile={profile}
-                isGuest={false}
                 customLists={customLists}
                 allEssentials={allEssentials}
                 updateTrip={updateTrip}
@@ -260,7 +258,6 @@ export default function App() {
                 trips={trips} 
                 inventory={inventory} 
                 profile={profile} 
-                isGuest={false} 
                 customLists={customLists} 
                 allEssentials={allEssentials} 
                 onAddTrip={addTrip} 
@@ -283,7 +280,6 @@ export default function App() {
             ) : (
               <ProfileView 
                 profile={profile} 
-                isGuest={false} 
                 inventory={inventory} 
                 onUpdateProfile={async (p) => updateProfile(p)} 
                 onSignOut={signOut} 

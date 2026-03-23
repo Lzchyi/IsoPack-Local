@@ -4,7 +4,6 @@ import { Trash2, Edit3, Upload, Users, LogOut } from 'lucide-react';
 
 interface TripActionsProps {
   isOwner: boolean;
-  onInvite: () => void;
   onEdit: () => void;
   onExport: () => void;
   onDelete: () => void;
@@ -12,7 +11,6 @@ interface TripActionsProps {
 
 export const TripActions: React.FC<TripActionsProps> = ({ 
   isOwner, 
-  onInvite, 
   onEdit, 
   onExport, 
   onDelete 
@@ -21,16 +19,6 @@ export const TripActions: React.FC<TripActionsProps> = ({
 
   return (
     <div className="flex items-center gap-2">
-      {isOwner && (
-        <button
-          onClick={onInvite}
-          className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 font-medium rounded-xl transition-colors flex items-center justify-center"
-          title={t('trips.invite', 'Invite')}
-          aria-label={t('trips.invite', 'Invite')}
-        >
-          <Users className="w-4 h-4" />
-        </button>
-      )}
       {isOwner && (
         <button
           onClick={onEdit}

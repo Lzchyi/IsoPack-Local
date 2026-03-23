@@ -54,8 +54,6 @@ export interface PackingItem {
   lensDetails?: string;
   cableType?: string;
   gamingConsoleType?: string;
-  ownerId?: string;
-  isShared?: boolean;
 }
 
 export interface Trip {
@@ -70,10 +68,6 @@ export interface Trip {
   createdAt: number;
   imageUrl?: string;
   uid?: string;
-  participants?: string[];
-  participantProfiles?: Record<string, { name: string; avatarUrl?: string }>;
-  inviteToken?: string;
-  lastConsumedToken?: string;
 }
 
 export interface CustomList {

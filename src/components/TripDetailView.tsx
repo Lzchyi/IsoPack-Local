@@ -19,7 +19,6 @@ interface Props {
   trip: Trip;
   inventory: InventoryItem[];
   profile: UserProfile | null;
-  isGuest: boolean;
   customLists: CustomList[];
   allEssentials: InventoryItem[];
   updateTrip: (trip: Trip) => void;
@@ -30,14 +29,12 @@ interface Props {
 
 const SMART_SELECTION_ITEMS = ['camera', 'camera lens', 'data cable', 'gaming console'];
 
-export default function TripDetailView({ trip, inventory, profile, isGuest, customLists, allEssentials, updateTrip, onDeleteTrip, onBack, onAddItem }: Props) {
+export default function TripDetailView({ trip, inventory, profile, customLists, allEssentials, updateTrip, onDeleteTrip, onBack, onAddItem }: Props) {
   const { t } = useTranslation();
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(
     CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat]: true }), {})
   );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isRemoveParticipantModalOpen, setIsRemoveParticipantModalOpen] = useState(false);
-  const [participantToRemove, setParticipantToRemove] = useState<string | null>(null);
   const [addTab, setAddTab] = useState<'mustBring' | 'gear' | 'suggested' | 'custom' | 'lists' | 'search'>('mustBring');
   const [expandedListId, setExpandedListId] = useState<string | null>(null);
   const [expandedPresetId, setExpandedPresetId] = useState<string | null>(null);
@@ -51,22 +48,14 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
   const [packingFilter, setPackingFilter] = useState<'all' | 'pending' | 'packed'>('all');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [isRemoveInviteeModalOpen, setIsRemoveInviteeModalOpen] = useState(false);
-  const [removeInviteeId, setRemoveInviteeId] = useState<string | null>(null);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [isOtherModalOpen, setIsOtherModalOpen] = useState(false);
   const [isInventoryPromptOpen, setIsInventoryPromptOpen] = useState(false);
   const [isApplyPresetModalOpen, setIsApplyPresetModalOpen] = useState(false);
-  const [isCopiedModalOpen, setIsCopiedModalOpen] = useState(false);
   const [selectedPresetKey, setSelectedPresetKey] = useState<string>('');
   const [otherItemName, setOtherItemName] = useState('');
   const [otherItemCategory, setOtherItemCategory] = useState<Category>(Category.Essentials);
-  const participantProfiles = trip.participantProfiles || {};
-  const [activeParticipantTab, setActiveParticipantTab] = useState<string>('all');
-  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [isRevokeModalOpen, setIsRevokeModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [inviteLink, setInviteLink] = useState('');
   const [editingQuantityId, setEditingQuantityId] = useState<string | null>(null);
   const quantityTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -193,32 +182,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
       ...trip,
       items: updatedItems
     });
-  };
-
-  const toggleItemShared = (itemId: string) => {
-    const itemToToggle = trip.items.find(item => item.id === itemId);
-    if (!itemToToggle) return;
-
-    const newIsShared = !itemToToggle.isShared;
-    
-    let newItems = trip.items.map(item => 
-      item.id === itemId ? { ...item, isShared: newIsShared } : item
-    );
-
-    if (newIsShared) {
-      // If shared, remove other private items with the same name
-      newItems = newItems.filter(item => 
-        item.id === itemId || !(item.name.toLowerCase() === itemToToggle.name.toLowerCase() && !item.isShared)
-      );
-    }
-
-    updateTrip({
-      ...trip,
-      items: newItems
-    });
-    if (editingQuantityId === itemId) {
-      resetQuantityTimer();
-    }
   };
 
   const deleteItem = (itemId: string) => {
@@ -435,18 +398,11 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
     setIsEditingTrip(false);
   };
 
-  const isSharedTrip = trip.participants && trip.participants.length > 1;
   const isOwner = true;
 
   const filteredItems = trip.items.filter(item => {
     if (packingFilter === 'pending' && item.isPacked) return false;
     if (packingFilter === 'packed' && !item.isPacked) return false;
-    
-    if (isSharedTrip) {
-      if (activeParticipantTab === 'shared') return item.isShared;
-      if (activeParticipantTab !== 'all' && item.ownerId !== activeParticipantTab) return false;
-    }
-    
     return true;
   });
 
@@ -510,7 +466,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
         </button>
         <TripActions 
           isOwner={isOwner}
-          onInvite={() => setIsInviteModalOpen(true)}
           onEdit={() => {
             setEditTripName(trip.name);
             setEditTripType(trip.tripType);
@@ -528,56 +483,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
           onDelete={() => setIsDeleteModalOpen(true)}
         />
       </div>
-
-      {isSharedTrip && (
-        <div className="flex overflow-x-auto no-scrollbar gap-2 mb-6 bg-stone-100 dark:bg-stone-800 p-1.5 rounded-2xl w-full">
-          <button
-            onClick={() => setActiveParticipantTab('all')}
-            className={`px-3 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
-              activeParticipantTab === 'all'
-                ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
-                : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
-            }`}
-          >
-            {t('common.all')}
-          </button>
-          <button
-            onClick={() => setActiveParticipantTab('shared')}
-            className={`px-3 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
-              activeParticipantTab === 'shared'
-                ? 'bg-white dark:bg-stone-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            {t('trips.sharedItems', 'Shared')}
-          </button>
-          {trip.participants?.map(uid => {
-            const isMe = uid === 'local';
-            const name = isMe ? t('trips.mine', 'Mine') : participantProfiles[uid]?.name || t('auth.traveler');
-            return (
-              <button
-                key={uid}
-                onClick={() => setActiveParticipantTab(uid)}
-                className={`px-3 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                  activeParticipantTab === uid
-                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
-                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
-                }`}
-              >
-                {participantProfiles[uid]?.avatarUrl ? (
-                  <img src={participantProfiles[uid].avatarUrl} alt={name} className="w-5 h-5 rounded-full" referrerPolicy="no-referrer" />
-                ) : (
-                  <div className="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center text-[10px] font-bold text-stone-500 dark:text-stone-300">
-                    {name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                {name}
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 p-6 mb-4">
         <div className="flex items-center justify-between mb-3">
@@ -664,71 +569,10 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
               
               {isExpanded && (
                 <div className="border-t border-stone-100 dark:border-stone-700 px-2 py-2">
-                  {activeParticipantTab === 'all' && isSharedTrip ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-                      {trip.participants?.map(uid => {
-                        const participantItems = items.filter(i => i.ownerId === uid);
-                        if (participantItems.length === 0) return null;
-                        
-                        const profile = participantProfiles[uid];
-                        const name = uid === 'local' ? t('trips.mine', 'Mine') : profile?.name || t('auth.traveler');
-                        
-                        return (
-                          <div key={uid} className="bg-stone-50 dark:bg-stone-900 rounded-xl p-3 border border-stone-100 dark:border-stone-700">
-                            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-stone-200 dark:border-stone-700">
-                              {profile?.avatarUrl ? (
-                                <img src={profile.avatarUrl} alt={name} className="w-5 h-5 rounded-full" referrerPolicy="no-referrer" />
-                              ) : (
-                                <div className="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center text-[10px] font-bold text-stone-500 dark:text-stone-300">
-                                  {name.charAt(0).toUpperCase()}
-                                </div>
-                              )}
-                              <span className="font-medium text-sm text-stone-700 dark:text-stone-300">{name}</span>
-                            </div>
-                            <div className="space-y-1">
-                              {participantItems.map(item => {
-                                const isItemOwner = true;
-                                return (
-                                  <div key={item.id} className="flex items-center justify-between group">
-                                    <button
-                                      onClick={() => isItemOwner && toggleItemPacked(item.id)}
-                                      disabled={!isItemOwner}
-                                      className={`flex-1 flex items-center gap-2 py-1.5 text-left ${!isItemOwner ? 'cursor-default' : ''}`}
-                                    >
-                                      <div className={`flex-shrink-0 transition-colors ${item.isPacked ? 'text-emerald-500 dark:text-emerald-400' : (isItemOwner ? 'text-stone-300 dark:text-stone-600 group-hover:text-stone-400' : 'text-stone-200 dark:text-stone-700')}`}>
-                                        {item.isPacked ? (
-                                          <CheckCircle2 className="w-4 h-4" />
-                                        ) : (
-                                          <Circle className="w-4 h-4" />
-                                        )}
-                                      </div>
-                                      <span className={`text-sm transition-all ${item.isPacked ? 'text-stone-400 dark:text-stone-500 line-through' : 'text-stone-700 dark:text-stone-300'}`}>
-                                        {t(`item.${item.name}`, item.name)}
-                                        {item.quantity && item.quantity > 1 && (
-                                          <span className="ml-1 text-xs text-stone-400 dark:text-stone-500 font-normal">x{item.quantity}</span>
-                                        )}
-                                      </span>
-                                      {item.isShared && (
-                                        <span className="flex items-center gap-1 px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[9px] font-medium ml-auto">
-                                          <Users className="w-3 h-3" />
-                                        </span>
-                                      )}
-                                    </button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    items.map((item) => {
-                      const isItemOwner = true;
-                      const showAvatar = isSharedTrip && (activeParticipantTab === 'all' || activeParticipantTab === 'shared');
-                      const itemOwnerProfile = item.ownerId ? participantProfiles[item.ownerId] : null;
+                  {items.map((item) => {
+                    const isItemOwner = true;
 
-                      return (
+                    return (
                       <div key={item.id} className="flex flex-col hover:bg-stone-50 dark:hover:bg-stone-700 rounded-xl transition-colors group border-b border-stone-50 dark:border-stone-700 last:border-0">
                         <div className="flex items-center justify-between">
                           <button
@@ -759,41 +603,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
                                   </div>
                                 )}
                               </span>
-                              {isSharedTrip && (isItemOwner ? (
-                                <div
-                                  role="button"
-                                  tabIndex={0}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleItemShared(item.id);
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.stopPropagation();
-                                      toggleItemShared(item.id);
-                                    }
-                                  }}
-                                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium cursor-pointer ${item.isShared ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400'}`}
-                                >
-                                  <Users className="w-3 h-3" />
-                                  {item.isShared ? t('trips.shared', 'Shared') : t('trips.private', 'Private')}
-                                </div>
-                              ) : item.isShared && (
-                                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium">
-                                  <Users className="w-3 h-3" />
-                                </span>
-                              ))}
-                              {showAvatar && itemOwnerProfile && (
-                                <div className="ml-auto flex-shrink-0" title={itemOwnerProfile.name}>
-                                  {itemOwnerProfile.avatarUrl ? (
-                                    <img src={itemOwnerProfile.avatarUrl} alt={itemOwnerProfile.name} className="w-5 h-5 rounded-full opacity-80" referrerPolicy="no-referrer" />
-                                  ) : (
-                                    <div className="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center text-[10px] font-bold text-stone-500 dark:text-stone-300 opacity-80">
-                                      {itemOwnerProfile.name.charAt(0).toUpperCase()}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
                             </div>
                           </button>
                           {isItemOwner && (
@@ -801,13 +610,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
                               <div className="flex items-center transition-all">
                                 {editingQuantityId === item.id ? (
                                   <>
-                                    <button
-                                      onClick={() => toggleItemShared(item.id)}
-                                      className={`p-3 transition-colors ${item.isShared ? 'text-emerald-500 hover:text-emerald-600' : 'text-stone-400 hover:text-emerald-500'}`}
-                                      title={t('trips.sharedItems', 'Shared')}
-                                    >
-                                      <Users className="w-4 h-4" />
-                                    </button>
                                     {!item.isPacked && (
                                       <>
                                         <button
@@ -848,9 +650,8 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
                           )}
                         </div>
                       </div>
-                      );
-                    })
-                  )}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -870,9 +671,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
             <button
               onClick={() => {
                 setPackingFilter('all');
-                if (activeParticipantTab === 'shared') {
-                  setActiveParticipantTab('all');
-                }
               }}
               className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline"
             >
@@ -1455,33 +1253,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
                 <div className="pt-4 border-t border-stone-100 dark:border-stone-700">
                   <div className="space-y-4">
                     <label className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-emerald-500" />
-                      {t('trips.invitees', 'Invitees')}
-                    </label>
-                    <div className="space-y-2">
-                      {trip.participants?.filter(uid => uid !== trip.uid).map(uid => {
-                        const profile = trip.participantProfiles?.[uid];
-                        return (
-                          <div key={uid} className="flex items-center justify-between px-4 py-2.5 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl max-w-sm">
-                            <span className="text-lg text-stone-700 dark:text-stone-300 font-medium">{profile?.name || t('auth.traveler')}</span>
-                            {isOwner && (
-                              <button
-                                onClick={() => {
-                                  setRemoveInviteeId(uid);
-                                  setIsRemoveInviteeModalOpen(true);
-                                }}
-                                className="text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 text-sm font-medium"
-                              >
-                                {t('common.remove', 'Remove')}
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <label className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-emerald-500" />
                       {t('trips.applyPreset', 'Apply Preset Template')}
                     </label>
@@ -1693,29 +1464,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
       />
 
       <ConfirmationModal
-        isOpen={isCopiedModalOpen}
-        onClose={() => setIsCopiedModalOpen(false)}
-        onConfirm={() => setIsCopiedModalOpen(false)}
-        title={t('common.copied')}
-        message={t('trips.inviteCodeCopied')}
-        confirmText={t('common.gotIt')}
-        variant="primary"
-      />
-
-      <ConfirmationModal
-        isOpen={isRevokeModalOpen}
-        onClose={() => setIsRevokeModalOpen(false)}
-        onConfirm={() => {
-          const { inviteToken, ...tripWithoutToken } = trip;
-          updateTrip(tripWithoutToken);
-          setIsRevokeModalOpen(false);
-        }}
-        title={t('trips.revokeInvite', 'Revoke Invite Code')}
-        message={t('trips.revokeInviteConfirm', 'Are you sure you want to revoke this invite code? New invitees will not be able to join using this code.')}
-        confirmText={t('trips.revokeInvite', 'Revoke')}
-      />
-
-      <ConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={() => {
@@ -1727,150 +1475,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
         message={t('trips.deleteConfirm')}
       />
 
-      {isInviteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onClick={() => setIsInviteModalOpen(false)} />
-          <div className="relative bg-white dark:bg-stone-800 rounded-3xl shadow-xl w-full max-w-md flex flex-col overflow-hidden">
-            <div className="px-6 py-5 border-b border-stone-100 dark:border-stone-700 flex items-center justify-between bg-white dark:bg-stone-800">
-              <h3 className="text-xl font-semibold dark:text-white">{t('trips.inviteCollaborator')}</h3>
-              <button 
-                onClick={() => setIsInviteModalOpen(false)}
-                className="text-stone-400 dark:text-stone-300 hover:text-stone-600 dark:hover:text-stone-100 font-medium text-sm px-3 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
-              >
-                {t('common.done')}
-              </button>
-            </div>
-            <div className="p-6">
-              <p className="text-stone-500 dark:text-stone-400 mb-4 text-sm">
-                {t('trips.inviteDescription')}
-              </p>
-              
-              <div className="mb-6">
-                {typeof trip.inviteToken === 'string' ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center gap-4 p-6 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700">
-                      <span className="text-4xl font-mono font-bold tracking-[0.2em] text-stone-800 dark:text-stone-100">
-                        {typeof trip.inviteToken === 'string' ? trip.inviteToken : ''}
-                      </span>
-                      <button 
-                        onClick={() => {
-                          navigator.clipboard.writeText(trip.inviteToken!);
-                          setIsCopiedModalOpen(true);
-                        }}
-                        className="p-2 text-stone-400 dark:text-stone-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700"
-                        title={t('common.copy', 'Copy')}
-                      >
-                        <Copy className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <button 
-                      onClick={() => setIsRevokeModalOpen(true)}
-                      className="text-red-500 text-sm font-medium hover:underline w-full text-center"
-                    >
-                      {t('trips.revokeInvite', 'Revoke Invite Code')}
-                    </button>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => {
-                      if (isGuest) {
-                        toast.error(t('auth.guestCollaborationWarning', 'Collaboration features are only available for logged-in users.'));
-                        return;
-                      }
-                      const token = Array.from({ length: 6 }, () => 
-                        'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]
-                      ).join('');
-                      updateTrip({ ...trip, inviteToken: token });
-                    }}
-                    className={`w-full py-3 ${isGuest ? 'bg-stone-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600'} text-white font-medium rounded-xl transition-colors`}
-                  >
-                    {t('trips.generateLink')}
-                  </button>
-                )}
-              </div>
-
-              {trip.participants && trip.participants.length > 1 && (
-                <div>
-                  <h4 className="font-medium text-stone-900 dark:text-white mb-3">{t('trips.participants')}</h4>
-                  <div className="space-y-3">
-                    {trip.participants.map(uid => {
-                      if (uid === 'local') return null;
-                      const profile = participantProfiles[uid];
-                      return (
-                        <div key={uid} className="flex items-center justify-between p-3 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-100 dark:border-stone-700">
-                          <div className="flex items-center gap-3">
-                            {profile?.avatarUrl ? (
-                              <img src={profile.avatarUrl} alt={profile.name} className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
-                            ) : (
-                              <div className="w-8 h-8 rounded-full bg-stone-200 dark:bg-stone-700 flex items-center justify-center text-sm font-bold text-stone-500 dark:text-stone-300">
-                                {profile?.name?.charAt(0).toUpperCase() || '?'}
-                              </div>
-                            )}
-                            <span className="font-medium text-stone-700 dark:text-stone-200">{profile?.name || t('auth.traveler')}</span>
-                          </div>
-                          <button 
-                            onClick={() => {
-                              setParticipantToRemove(uid);
-                              setIsRemoveParticipantModalOpen(true);
-                            }}
-                            className="text-red-500 text-sm font-medium hover:underline"
-                          >
-                            {t('common.remove')}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              
-              <ConfirmationModal
-                isOpen={isRemoveParticipantModalOpen}
-                onClose={() => {
-                  setIsRemoveParticipantModalOpen(false);
-                  setParticipantToRemove(null);
-                }}
-                onConfirm={() => {
-                  if (participantToRemove) {
-                    const newProfiles = { ...trip.participantProfiles };
-                    delete newProfiles[participantToRemove];
-                    updateTrip({
-                      ...trip,
-                      participants: trip.participants?.filter(p => p !== participantToRemove),
-                      items: trip.items.filter(item => item.ownerId !== participantToRemove),
-                      participantProfiles: newProfiles
-                    });
-                  }
-                }}
-                title={t('trips.removeParticipantConfirmTitle', 'Remove Participant')}
-                message={t('trips.removeParticipantConfirm', 'Are you sure you want to remove this participant? All their items will be deleted.')}
-                variant="danger"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      <ConfirmationModal
-        isOpen={isRemoveInviteeModalOpen}
-        onClose={() => setIsRemoveInviteeModalOpen(false)}
-        onConfirm={() => {
-          if (removeInviteeId) {
-            const newProfiles = { ...trip.participantProfiles };
-            delete newProfiles[removeInviteeId];
-            updateTrip({
-              ...trip,
-              participants: trip.participants?.filter(p => p !== removeInviteeId),
-              items: trip.items.filter(item => item.ownerId !== removeInviteeId),
-              participantProfiles: newProfiles
-            });
-            setIsRemoveInviteeModalOpen(false);
-            setRemoveInviteeId(null);
-          }
-        }}
-        title={t('trips.removeInvitee', 'Remove Invitee')}
-        message={t('trips.removeInviteeConfirm', 'Are you sure you want to remove this invitee? All their items will be deleted.')}
-      />
       <ConfirmationModal
         isOpen={isClearModalOpen}
         onClose={() => setIsClearModalOpen(false)}
