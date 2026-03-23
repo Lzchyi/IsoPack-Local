@@ -11,6 +11,8 @@ IsoPack Local is a minimalist, cinematic travel packing utility designed for the
 ## Key Features
 
 - **Local Storage**: All your trips and inventory are stored securely on your device using IndexedDB, ensuring your data is private and accessible offline.
+- **Data Sovereignty**: Easily export your entire data library to a JSON file and import it back to any device.
+- **Password Protection**: Secure your local data with a password-protected account.
 - **Trip Management**: Create, edit, and manage your travel itineraries and packing lists.
 - **Inventory Library**: Build and maintain your personal gear library. Categorize items, track quantities, and mark essential "must-bring" items.
 - **Custom Templates**: Create custom packing templates for different types of trips to get started quickly.
@@ -21,9 +23,10 @@ IsoPack Local is a minimalist, cinematic travel packing utility designed for the
 
 - **Frontend**: React 18+, TypeScript, Tailwind CSS
 - **Database**: Dexie.js (IndexedDB)
-- **UI Components**: Lucide React
+- **UI Components**: Lucide React, Motion (for animations)
 - **Internationalization**: react-i18next
 - **Build/PWA**: Vite, vite-plugin-pwa
+- **Security**: Web Crypto API (for password hashing)
 
 ## Getting Started
 
