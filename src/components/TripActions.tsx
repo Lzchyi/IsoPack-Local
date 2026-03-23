@@ -8,7 +8,6 @@ interface TripActionsProps {
   onEdit: () => void;
   onExport: () => void;
   onDelete: () => void;
-  onLeave: () => void;
 }
 
 export const TripActions: React.FC<TripActionsProps> = ({ 
@@ -16,8 +15,7 @@ export const TripActions: React.FC<TripActionsProps> = ({
   onInvite, 
   onEdit, 
   onExport, 
-  onDelete, 
-  onLeave 
+  onDelete 
 }) => {
   const { t } = useTranslation();
 
@@ -52,12 +50,12 @@ export const TripActions: React.FC<TripActionsProps> = ({
         <Upload className="w-4 h-4" />
       </button>
       <button
-        onClick={isOwner ? onDelete : onLeave}
+        onClick={onDelete}
         className="w-10 h-10 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-medium rounded-xl transition-colors flex items-center justify-center"
-        title={isOwner ? t('common.delete') : t('trips.leave', 'Leave')}
-        aria-label={isOwner ? t('common.delete') : t('trips.leave', 'Leave')}
+        title={t('common.delete')}
+        aria-label={t('common.delete')}
       >
-        {isOwner ? <Trash2 className="w-4 h-4" /> : <LogOut className="w-4 h-4" />}
+        <Trash2 className="w-4 h-4" />
       </button>
     </div>
   );

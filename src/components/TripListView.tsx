@@ -127,21 +127,6 @@ export default function TripListView({ trips, inventory, profile, isGuest, custo
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('must-bring');
 
-  const handleJoinSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!joinCode.trim() || isSubmittingJoin) return;
-
-    setIsSubmittingJoin(true);
-    try {
-      await onJoinTrip(joinCode);
-      setIsJoining(false);
-      setJoinCode('');
-    } catch (err) {
-      // Error is handled in App.tsx
-    } finally {
-      setIsSubmittingJoin(false);
-    }
-  };
 
   const handleCreateTrip = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -515,7 +500,7 @@ export default function TripListView({ trips, inventory, profile, isGuest, custo
           </div>
         )}
 
-        {trips.length === 0 && !isCreating && !isJoining && (
+        {trips.length === 0 && !isCreating && (
           <div className="text-center py-16 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 border-dashed">
             <Plane className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
             <h3 className="text-lg font-medium text-stone-900 dark:text-white">{t('trips.noTrips')}</h3>

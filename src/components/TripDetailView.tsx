@@ -53,7 +53,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isRemoveInviteeModalOpen, setIsRemoveInviteeModalOpen] = useState(false);
   const [removeInviteeId, setRemoveInviteeId] = useState<string | null>(null);
-  const [isLeaveTripModalOpen, setIsLeaveTripModalOpen] = useState(false);
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [isOtherModalOpen, setIsOtherModalOpen] = useState(false);
   const [isInventoryPromptOpen, setIsInventoryPromptOpen] = useState(false);
@@ -437,7 +436,7 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
   };
 
   const isSharedTrip = trip.participants && trip.participants.length > 1;
-  const isOwner = trip.uid === 'local';
+  const isOwner = true;
 
   const filteredItems = trip.items.filter(item => {
     if (packingFilter === 'pending' && item.isPacked) return false;
@@ -527,7 +526,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
           }}
           onExport={() => setIsExportModalOpen(true)}
           onDelete={() => setIsDeleteModalOpen(true)}
-          onLeave={() => setIsLeaveTripModalOpen(true)}
         />
       </div>
 
@@ -689,7 +687,7 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
                             </div>
                             <div className="space-y-1">
                               {participantItems.map(item => {
-                                const isItemOwner = item.ownerId === 'local';
+                                const isItemOwner = true;
                                 return (
                                   <div key={item.id} className="flex items-center justify-between group">
                                     <button
@@ -726,7 +724,7 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
                     </div>
                   ) : (
                     items.map((item) => {
-                      const isItemOwner = item.ownerId === 'local' || (!isSharedTrip && trip.uid === 'local');
+                      const isItemOwner = true;
                       const showAvatar = isSharedTrip && (activeParticipantTab === 'all' || activeParticipantTab === 'shared');
                       const itemOwnerProfile = item.ownerId ? participantProfiles[item.ownerId] : null;
 
@@ -1514,26 +1512,11 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
             </div>
             <div className="p-6 border-t border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 flex justify-between gap-3">
               <button
-                onClick={() => {
-                  if (isOwner) {
-                    setIsDeleteModalOpen(true);
-                  } else {
-                    setIsLeaveTripModalOpen(true);
-                  }
-                }}
+                onClick={() => setIsDeleteModalOpen(true)}
                 className="px-4 py-2.5 text-red-600 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors flex items-center gap-2"
               >
-                {isOwner ? (
-                  <>
-                    <Trash2 className="w-4 h-4" />
-                    {t('common.delete')}
-                  </>
-                ) : (
-                  <>
-                    <LogOut className="w-4 h-4" />
-                    {t('trips.leave', 'Leave')}
-                  </>
-                )}
+                <Trash2 className="w-4 h-4" />
+                {t('common.delete')}
               </button>
               <div className="flex gap-3">
                 <button
@@ -1887,23 +1870,6 @@ export default function TripDetailView({ trip, inventory, profile, isGuest, cust
         }}
         title={t('trips.removeInvitee', 'Remove Invitee')}
         message={t('trips.removeInviteeConfirm', 'Are you sure you want to remove this invitee? All their items will be deleted.')}
-      />
-      <ConfirmationModal
-        isOpen={isLeaveTripModalOpen}
-        onClose={() => setIsLeaveTripModalOpen(false)}
-        onConfirm={() => {
-          const newProfiles = { ...trip.participantProfiles };
-          delete newProfiles['local'];
-          updateTrip({
-            ...trip,
-            participants: trip.participants?.filter(p => p !== 'local'),
-            items: trip.items.filter(item => item.ownerId !== 'local'),
-            participantProfiles: newProfiles
-          });
-          onBack();
-        }}
-        title={t('trips.leave', 'Leave')}
-        message={t('trips.leaveTripConfirm', 'Are you sure you want to leave this trip? All your items will be deleted.')}
       />
       <ConfirmationModal
         isOpen={isClearModalOpen}
