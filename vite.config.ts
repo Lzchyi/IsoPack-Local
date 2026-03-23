@@ -12,12 +12,12 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['apple-touch-icon.png', 'icon.svg'],
+        includeAssets: ['apple-touch-icon.png'],
         manifest: {
           name: 'IsoPack',
           short_name: 'IsoPack',
           description: 'Offline-first travel packing assistant',
-          theme_color: '#065f46',
+          theme_color: '#10b981',
           background_color: '#ffffff',
           display: 'standalone',
           start_url: '/',
@@ -25,7 +25,8 @@ export default defineConfig(({mode}) => {
             {
               src: 'apple-touch-icon.png',
               sizes: '180x180',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             },
             {
               src: 'apple-touch-icon.png',
@@ -34,15 +35,15 @@ export default defineConfig(({mode}) => {
               purpose: 'any'
             },
             {
-              src: 'icon.svg',
+              src: 'apple-touch-icon.png',
               sizes: '192x192',
-              type: 'image/svg+xml',
+              type: 'image/png',
               purpose: 'any'
             },
             {
-              src: 'icon.svg',
+              src: 'apple-touch-icon.png',
               sizes: 'any',
-              type: 'image/svg+xml',
+              type: 'image/png',
               purpose: 'maskable'
             }
           ]
