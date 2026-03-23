@@ -14,8 +14,8 @@ export default defineConfig(({mode}) => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
         manifest: {
-          name: 'PackMate Local',
-          short_name: 'PackMate Local',
+          name: 'IsoPack Local',
+          short_name: 'IsoPack Local',
           description: 'Offline-first travel packing assistant',
           theme_color: '#065f46', // emerald-800
           icons: [

@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   'en-GB': {
     translation: {
-      'app.name': 'PackMate Local',
+      'app.name': 'IsoPack Local',
       'app.tagline': 'Your Ultimate Travel Packing Checklist',
       'nav.inventory': 'Inventory',
       'nav.trips': 'Trips',
@@ -28,7 +28,7 @@ const resources = {
       'profile.signOutConfirmMessage': 'Are you sure you want to sign out?',
       'profile.deleteAccount': 'Delete Account',
       'profile.deleteAccountConfirmTitle': 'Delete Account',
-      'profile.deleteAccountConfirmMessage': 'This will wipe all your data stored in PackMate Local and cannot be undone.',
+      'profile.deleteAccountConfirmMessage': 'This will wipe all your data stored in IsoPack Local and cannot be undone.',
       'profile.deleteAccountWarning': 'Please type "Delete Confirm" to proceed:',
       'profile.deleteAccountInputPlaceholder': 'Type "Delete Confirm" here',
       'profile.deleteAccountButton': 'Delete My Account',
@@ -423,7 +423,7 @@ const resources = {
   },
   'zh-CN': {
     translation: {
-      'app.name': 'PackMate Local',
+      'app.name': 'IsoPack Local',
       'app.tagline': '您的终极旅行打包清单',
       'nav.inventory': '装备库',
       'nav.trips': '行程',
@@ -447,7 +447,7 @@ const resources = {
       'profile.signOutConfirmMessage': '您确定要退出登录吗？',
       'profile.deleteAccount': '删除账户',
       'profile.deleteAccountConfirmTitle': '删除账户',
-      'profile.deleteAccountConfirmMessage': '这将清除您在 PackMate Local 中存储的所有数据，且无法撤销。',
+      'profile.deleteAccountConfirmMessage': '这将清除您在 IsoPack Local 中存储的所有数据，且无法撤销。',
       'profile.deleteAccountWarning': '请输入 "Delete Confirm" 以继续：',
       'profile.deleteAccountInputPlaceholder': '在此输入 "Delete Confirm"',
       'profile.deleteAccountButton': '删除我的账户',

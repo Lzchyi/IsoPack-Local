@@ -60,6 +60,12 @@ export default function App() {
     if (savedLists) setCustomLists(JSON.parse(savedLists));
   }, []);
 
+  useEffect(() => {
+    if (activeTripId && trips && !trips.find(t => t.id === activeTripId)) {
+      setActiveTripId(null);
+    }
+  }, [activeTripId, trips]);
+
   const tabs: ('landing' | 'trips' | 'inventory' | 'profile')[] = ['landing', 'trips', 'inventory', 'profile'];
 
   const handleSwipe = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -230,7 +236,7 @@ export default function App() {
             onPanEnd={handleSwipe}
             className="h-full"
           >
-            {activeTripId ? (
+            {activeTripId && trips.find(t => t.id === activeTripId) ? (
               <TripDetailView 
                 trip={trips.find(t => t.id === activeTripId)!} 
                 inventory={inventory}
