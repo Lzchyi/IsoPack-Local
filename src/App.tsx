@@ -294,7 +294,7 @@ export default function App() {
           <div className="bg-emerald-500 text-white p-2.5 rounded-xl shrink-0 shadow-lg shadow-emerald-500/20">
             <Luggage className="w-6 h-6" />
           </div>
-          <h1 className="hidden lg:block text-2xl font-black tracking-tighter text-stone-900 dark:text-white uppercase italic">IsoPack</h1>
+          <h1 className="hidden lg:block text-2xl font-black tracking-tighter text-stone-900 dark:text-white italic">IsoPack</h1>
         </div>
 
         {/* Local Sovereignty Indicator */}

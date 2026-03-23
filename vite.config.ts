@@ -12,7 +12,8 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['apple-touch-icon.png'],
+        includeAssets: ['logo.png'],
+        filename: 'manifest.json',
         manifest: {
           name: 'IsoPack',
           short_name: 'IsoPack',
@@ -23,28 +24,19 @@ export default defineConfig(({mode}) => {
           start_url: '/',
           icons: [
             {
-              src: 'apple-touch-icon.png?v=3',
+              src: 'logo.png',
               sizes: '180x180',
-              type: 'image/png',
-              purpose: 'any'
+              type: 'image/png'
             },
             {
-              src: 'apple-touch-icon.png?v=3',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: 'apple-touch-icon.png?v=3',
+              src: 'logo.png',
               sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any'
+              type: 'image/png'
             },
             {
-              src: 'apple-touch-icon.png?v=3',
-              sizes: 'any',
-              type: 'image/png',
-              purpose: 'maskable'
+              src: 'logo.png',
+              sizes: '512x512',
+              type: 'image/png'
             }
           ]
         }
