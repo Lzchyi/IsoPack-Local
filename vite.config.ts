@@ -12,7 +12,7 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+        includeAssets: ['apple-touch-icon.png'],
         manifest: {
           name: 'IsoPack',
           short_name: 'IsoPack',
@@ -20,14 +20,15 @@ export default defineConfig(({mode}) => {
           theme_color: '#065f46', // emerald-800
           icons: [
             {
-              src: 'pwa-192x192.png',
-              sizes: '192x192',
+              src: 'apple-touch-icon.png',
+              sizes: '180x180',
               type: 'image/png'
             },
             {
-              src: 'pwa-512x512.png',
+              src: 'apple-touch-icon.png',
               sizes: '512x512',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any maskable'
             }
           ]
         }
