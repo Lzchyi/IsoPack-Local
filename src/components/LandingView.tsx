@@ -53,17 +53,6 @@ export default function LandingView({ profile, trips, onNavigate }: Props) {
               />
               <div className="absolute inset-0 bg-black/30" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              {nextTrip.uid && nextTrip.participantProfiles?.[nextTrip.uid] && (
-                <div className="absolute top-6 left-6 w-10 h-10 rounded-full border-2 border-white/20 shadow-sm overflow-hidden z-10">
-                  {nextTrip.participantProfiles[nextTrip.uid].avatarUrl ? (
-                    <img src={nextTrip.participantProfiles[nextTrip.uid].avatarUrl} alt={nextTrip.participantProfiles[nextTrip.uid].name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <div className="w-full h-full bg-stone-200 flex items-center justify-center text-sm font-bold text-stone-500">
-                      {nextTrip.participantProfiles[nextTrip.uid].name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-              )}
             </>
           ) : (
             <>

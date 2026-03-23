@@ -16,6 +16,7 @@ import { TripHeader } from './TripHeader';
 import { TripActions } from './TripActions';
 
 interface Props {
+  activeUserId: string;
   trip: Trip;
   inventory: InventoryItem[];
   profile: UserProfile | null;
@@ -29,7 +30,7 @@ interface Props {
 
 const SMART_SELECTION_ITEMS = ['camera', 'camera lens', 'data cable', 'gaming console'];
 
-export default function TripDetailView({ trip, inventory, profile, customLists, allEssentials, updateTrip, onDeleteTrip, onBack, onAddItem }: Props) {
+export default function TripDetailView({ activeUserId, trip, inventory, profile, customLists, allEssentials, updateTrip, onDeleteTrip, onBack, onAddItem }: Props) {
   const { t } = useTranslation();
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(
     CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat]: true }), {})
@@ -222,9 +223,7 @@ export default function TripDetailView({ trip, inventory, profile, customLists, 
       name,
       category,
       isPacked: false,
-      quantity: 1,
-      ownerId: undefined,
-      isShared: false
+      quantity: 1
     };
 
     if (name.toLowerCase() === 'camera') {
@@ -305,7 +304,8 @@ export default function TripDetailView({ trip, inventory, profile, customLists, 
         name,
         category,
         isMaster: false,
-        quantity: 1
+        quantity: 1,
+        ownerId: activeUserId
       });
     }
 

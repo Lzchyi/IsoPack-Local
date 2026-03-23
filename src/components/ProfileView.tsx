@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { UserProfile, InventoryItem } from '../types';
-import { User, Save, LogOut, ShieldCheck, Globe, Shield, X, Trash2, Info, Moon, Sun } from 'lucide-react';
+import { User, Save, LogOut, ShieldCheck, Globe, Shield, X, Trash2, Info, Moon, Sun, Camera, Edit2, Download, Upload, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ConfirmationModal from './ConfirmationModal';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { compressImage } from '../utils/image';
+import { toast } from 'react-hot-toast';
 
 interface Props {
   profile: UserProfile | null;
@@ -11,9 +13,11 @@ interface Props {
   onUpdateProfile: (profile: UserProfile) => Promise<void>;
   onSignOut: () => Promise<void>;
   onDeleteAccount: () => Promise<void>;
+  onExportData: () => void;
+  onImportData: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function ProfileView({ profile, inventory, onUpdateProfile, onSignOut, onDeleteAccount }: Props) {
+export default function ProfileView({ profile, inventory, onUpdateProfile, onSignOut, onDeleteAccount, onExportData, onImportData }: Props) {
   const { t, i18n } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useDarkMode();
   const [name, setName] = useState(profile?.name || '');
@@ -22,8 +26,45 @@ export default function ProfileView({ profile, inventory, onUpdateProfile, onSig
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const mustBringItems = inventory.filter(item => item.isMaster);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+
+    try {
+      const compressedFile = await compressImage(file, 400, 0.7);
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        await onUpdateProfile({
+          ...profile,
+          avatarUrl: base64String
+        });
+        toast.success(t('profile.imageUpdated', 'Profile picture updated'));
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (err) {
+      console.error('Failed to update profile picture', err);
+      toast.error(t('profile.imageUpdateFailed', 'Failed to update profile picture'));
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    if (!profile) return;
+    try {
+      await onUpdateProfile({
+        ...profile,
+        avatarUrl: undefined
+      });
+      toast.success(t('profile.imageDeleted', 'Profile picture deleted'));
+    } catch (err) {
+      console.error('Failed to delete profile picture', err);
+      toast.error(t('profile.imageDeleteFailed', 'Failed to delete profile picture'));
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,10 +112,52 @@ export default function ProfileView({ profile, inventory, onUpdateProfile, onSig
       </div>
 
       <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 p-6 sm:p-8">
-        <div className="flex items-center justify-center mb-8">
-          <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 border-4 border-white dark:border-stone-800 shadow-sm text-2xl font-bold">
-            {profile?.name ? getInitials(profile.name) : <User className="w-10 h-10" />}
+        <div className="flex flex-col items-center mb-8">
+          <div className="relative group">
+            <div className="w-32 h-32 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 border-4 border-white dark:border-stone-800 shadow-md overflow-hidden">
+              {profile?.avatarUrl ? (
+                <img 
+                  src={profile.avatarUrl} 
+                  alt={profile.name} 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className="text-3xl font-bold">
+                  {profile?.name ? getInitials(profile.name) : <User className="w-12 h-12" />}
+                </span>
+              )}
+            </div>
+            
+            <div className="absolute bottom-0 right-0 flex gap-2">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg transition-all transform hover:scale-110"
+                title={t('profile.changePhoto', 'Change Photo')}
+              >
+                <Camera className="w-5 h-5" />
+              </button>
+              {profile?.avatarUrl && (
+                <button
+                  onClick={handleDeleteImage}
+                  className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all transform hover:scale-110"
+                  title={t('profile.deletePhoto', 'Delete Photo')}
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/*"
+              className="hidden"
+            />
           </div>
+          <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
+            {t('profile.clickToChange', 'Click the camera to update your photo')}
+          </p>
         </div>
 
         {isEditing ? (
@@ -198,6 +281,52 @@ export default function ProfileView({ profile, inventory, onUpdateProfile, onSig
             </div>
             <h3 className="font-semibold dark:text-stone-100">{t('profile.privacy')}</h3>
           </button>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 p-6 sm:p-8 space-y-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg">
+            <Database className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{t('profile.dataSovereignty', 'Data Sovereignty')}</h3>
+            <p className="text-sm text-stone-500 dark:text-stone-400">{t('profile.localOnlyDesc', 'Your data never leaves this device.')}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            onClick={onExportData}
+            className="flex items-center justify-center gap-2 p-4 bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl transition-all group"
+          >
+            <Download className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
+            <div className="text-left">
+              <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('profile.exportData', 'Export Backup')}</p>
+              <p className="text-xs text-stone-500">{t('profile.exportDesc', 'Download JSON file')}</p>
+            </div>
+          </button>
+
+          <label className="flex items-center justify-center gap-2 p-4 bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl transition-all group cursor-pointer">
+            <Upload className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
+            <div className="text-left">
+              <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('profile.importData', 'Import Backup')}</p>
+              <p className="text-xs text-stone-500">{t('profile.importDesc', 'Restore from file')}</p>
+            </div>
+            <input
+              type="file"
+              accept=".json"
+              onChange={onImportData}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 p-4 rounded-xl flex gap-3">
+          <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
+            {t('profile.backupWarning', 'Since IsoPack is local-only, we recommend exporting a backup periodically. If you clear your browser data or lose this device, your data will be lost.')}
+          </p>
         </div>
       </div>
 

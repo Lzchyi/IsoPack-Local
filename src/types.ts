@@ -41,6 +41,7 @@ export interface InventoryItem {
   category: Category;
   isMaster?: boolean;
   quantity?: number;
+  ownerId: string;
 }
 
 export interface PackingItem {
@@ -68,12 +69,14 @@ export interface Trip {
   createdAt: number;
   imageUrl?: string;
   uid?: string;
+  ownerId: string;
 }
 
 export interface CustomList {
   id: string;
   name: string;
   items: { name: string; category: Category }[];
+  ownerId: string;
 }
 
 export interface UserProfile {
@@ -84,5 +87,15 @@ export interface UserProfile {
   mustBringItems?: { id: string; name: string; category: Category }[];
   avatarUrl?: string;
   language?: 'en-GB' | 'zh-CN';
+  ownerId: string;
+}
+
+export interface UserAccount {
+  id: string;
+  username: string;
+  passwordHash: string;
+  salt: string;
+  createdAt: number;
+  isGuest: boolean;
 }
 

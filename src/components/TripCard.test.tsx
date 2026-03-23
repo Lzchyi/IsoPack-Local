@@ -26,6 +26,7 @@ describe('TripCard', () => {
       { id: 'i2', name: 'Sunscreen', category: CATEGORIES[1], isPacked: false },
     ],
     createdAt: Date.now(),
+    ownerId: 'user1'
   };
 
   it('renders trip name correctly', () => {

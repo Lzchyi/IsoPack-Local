@@ -13,10 +13,10 @@ import ConfirmationModal from './ConfirmationModal';
 import TripCard from './TripCard';
 
 interface Props {
+  activeUserId: string;
   trips: Trip[];
   inventory: InventoryItem[];
   profile: UserProfile | null;
-  isGuest: boolean;
   customLists: CustomList[];
   allEssentials: InventoryItem[];
   onAddTrip: (trip: Trip) => Promise<void>;
@@ -26,7 +26,7 @@ interface Props {
 
 type SortOption = 'newest' | 'oldest' | 'name' | 'progress';
 
-export default function TripListView({ trips, inventory, profile, isGuest, customLists, allEssentials, onAddTrip, onDeleteTrip, onSelectTrip }: Props) {
+export default function TripListView({ activeUserId, trips, inventory, profile, customLists, allEssentials, onAddTrip, onDeleteTrip, onSelectTrip }: Props) {
   const { t } = useTranslation();
   const [isCreating, setIsCreating] = useState(false);
   const [newTripName, setNewTripName] = useState('');
@@ -190,7 +190,8 @@ export default function TripListView({ trips, inventory, profile, isGuest, custo
       duration: `${formattedStartDate} ${t('trips.to')} ${formattedEndDate}`,
       items: initialItems,
       createdAt: Date.now(),
-      imageUrl: newTripImage
+      imageUrl: newTripImage,
+      ownerId: activeUserId
     };
 
     // Optimistically close modal and reset fields
@@ -217,11 +218,7 @@ export default function TripListView({ trips, inventory, profile, isGuest, custo
     let filtered = [...trips];
     
     if (filterType !== 'All') {
-      if (filterType === 'Shared') {
-        filtered = filtered.filter(t => (t.participants?.length || 0) > 1);
-      } else {
-        filtered = filtered.filter(t => t.tripType === filterType);
-      }
+      filtered = filtered.filter(t => t.tripType === filterType);
     }
 
     const upcoming: Trip[] = [];
@@ -229,7 +226,7 @@ export default function TripListView({ trips, inventory, profile, isGuest, custo
     const shared: Trip[] = [];
 
     filtered.forEach(trip => {
-      const isShared = (trip.participants?.length || 0) > 1;
+      const isShared = false;
       const tripEndDate = trip.endDate ? parseISO(trip.endDate) : null;
       const isPast = tripEndDate && tripEndDate < now;
 

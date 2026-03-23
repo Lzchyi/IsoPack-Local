@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { Virtuoso } from 'react-virtuoso';
 import { InventoryItem, Category, CustomList } from '../types';
 import { CATEGORIES, SUGGESTED_ITEMS } from '../data/constants';
-import { Plus, Trash2, Star, Box, Edit2, CheckSquare, Square, Save, X, List as ListIcon, Sparkles, Eye, Info, Settings, Filter, ArrowUpDown } from 'lucide-react';
+import { Plus, Trash2, Star, Box, Edit2, CheckSquare, Square, Save, X, List as ListIcon, Sparkles, Eye, Info, Settings, Filter, ArrowUpDown, ShieldCheck } from 'lucide-react';
 
 interface Props {
+  activeUserId: string;
   inventory: InventoryItem[];
   customLists: CustomList[];
   allEssentials: InventoryItem[];
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function InventoryView({ 
+  activeUserId,
   inventory, 
   customLists, 
   allEssentials,
@@ -93,6 +95,7 @@ export default function InventoryView({
       category: newItemCategory,
       isMaster: newItemIsMaster,
       quantity: newItemQuantity,
+      ownerId: activeUserId
     };
 
     onAddItem(newItem);
@@ -162,7 +165,8 @@ export default function InventoryView({
     const newList: CustomList = {
       id: nanoid(),
       name: `${t(`type.${presetName}`, presetName)} ${t('inventory.essentials')}`,
-      items: finalItems
+      items: finalItems,
+      ownerId: activeUserId
     };
     onAddList(newList);
   };
@@ -536,7 +540,7 @@ export default function InventoryView({
               <p className="text-sm text-stone-500 dark:text-stone-400">{t('inventory.customListsTagline')}</p>
             </div>
             <button
-              onClick={() => setEditingList({ id: nanoid(), name: '', items: [] })}
+              onClick={() => setEditingList({ id: nanoid(), name: '', items: [], ownerId: activeUserId })}
               className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl px-4 py-2 flex items-center gap-2 transition-colors whitespace-nowrap"
             >
               <Plus className="w-4 h-4" /> {t('inventory.createList')}
@@ -982,7 +986,7 @@ export default function InventoryView({
                               if (isSelected) {
                                 setAllEssentials(allEssentials.filter(e => e.name.toLowerCase() !== item.name.toLowerCase()));
                               } else {
-                                setAllEssentials([...allEssentials, { id: nanoid(), name: item.name, category: item.category }]);
+                                setAllEssentials([...allEssentials, { id: nanoid(), name: item.name, category: item.category, ownerId: activeUserId, isMaster: true, quantity: 1 }]);
                               }
                             }}
                             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
@@ -1002,7 +1006,7 @@ export default function InventoryView({
                 <div className="pt-4 border-t border-stone-100">
                   <button 
                     onClick={() => {
-                      setAllEssentials([...allEssentials, { id: nanoid(), name: '', category: Category.Essentials }]);
+                      setAllEssentials([...allEssentials, { id: nanoid(), name: '', category: Category.Essentials, ownerId: activeUserId, isMaster: true, quantity: 1 }]);
                       setIsSuggestedEssentialsOpen(false);
                     }}
                     className="w-full py-3 border-2 border-dashed border-stone-200 rounded-xl text-stone-500 font-medium hover:border-emerald-500 hover:text-emerald-600 transition-all flex items-center justify-center gap-2"
@@ -1024,6 +1028,12 @@ export default function InventoryView({
           </div>
         </div>
       )}
+      <div className="mt-12 pt-8 border-t border-stone-200 dark:border-stone-700 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 dark:bg-stone-800/50 rounded-full text-stone-500 dark:text-stone-400 text-xs font-medium">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+          {t('inventory.localOnlyDisclaimer', 'Local-Only Protocol: All data is stored in your browser\'s IndexedDB.')}
+        </div>
+      </div>
     </div>
   );
 }

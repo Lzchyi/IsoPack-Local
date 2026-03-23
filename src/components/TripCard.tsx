@@ -49,22 +49,6 @@ const TripCardComponent: React.FC<TripCardProps> = ({ trip, onSelectTrip, onDele
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-emerald-600 to-teal-700" />
         )}
-        {trip.participants && (
-          <div className="absolute top-3 right-3 flex -space-x-2">
-            {Array.from(new Set([trip.uid, ...(trip.participants || [])])).filter(Boolean).map(uid => {
-              const participant = trip.participantProfiles?.[uid as string];
-              return (
-                <div key={uid} className="w-8 h-8 rounded-full border-2 border-white bg-stone-200 flex items-center justify-center text-xs font-bold text-stone-500 overflow-hidden">
-                  {participant?.avatarUrl ? (
-                    <img src={participant.avatarUrl} alt={participant?.name || ''} className="w-full h-full rounded-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    participant?.name.charAt(0).toUpperCase()
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
         <div className="absolute inset-0 bg-black/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
