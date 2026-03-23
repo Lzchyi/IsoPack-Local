@@ -25,7 +25,7 @@ export default function App() {
   const [isGuest, setIsGuest] = useState<boolean>(localStorage.getItem('isopack_is_guest') === 'true');
 
   const [allEssentials, setAllEssentials] = useState<InventoryItem[]>(() => {
-    const saved = localStorage.getItem('packwise_essentials_v2');
+    const saved = localStorage.getItem('isopack_essentials_v2');
     return saved ? JSON.parse(saved) : (SUGGESTED_ITEMS['All Essentials'] || []);
   });
 
@@ -46,7 +46,7 @@ export default function App() {
   , [activeUserId]) || null;
 
   useEffect(() => {
-    localStorage.setItem('packwise_essentials_v2', JSON.stringify(allEssentials));
+    localStorage.setItem('isopack_essentials_v2', JSON.stringify(allEssentials));
   }, [allEssentials]);
 
   useEffect(() => {

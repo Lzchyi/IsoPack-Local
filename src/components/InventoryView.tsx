@@ -50,12 +50,12 @@ export default function InventoryView({
   const [newListItemName, setNewListItemName] = useState('');
   const [newListItemCategory, setNewListItemCategory] = useState<Category>(Category.Essentials);
   const [includeEssentialsInPreset, setIncludeEssentialsInPreset] = useState(() => {
-    const saved = localStorage.getItem('packwise_include_essentials');
+    const saved = localStorage.getItem('isopack_include_essentials');
     return saved !== null ? JSON.parse(saved) : true;
   });
 
   useEffect(() => {
-    localStorage.setItem('packwise_include_essentials', JSON.stringify(includeEssentialsInPreset));
+    localStorage.setItem('isopack_include_essentials', JSON.stringify(includeEssentialsInPreset));
   }, [includeEssentialsInPreset]);
 
   const [filterCategory, setFilterCategory] = useState<string>('All');

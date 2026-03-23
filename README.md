@@ -1,6 +1,6 @@
-# IsoPack Local
+# IsoPack
 
-IsoPack Local is a minimalist, cinematic travel packing utility designed for the modern traveler who values simplicity and privacy. IsoPack Local is a fully local-first, offline-ready application that ensures your packing lists are always with you, regardless of internet connectivity.
+IsoPack is a minimalist, cinematic travel packing utility designed for the modern traveler who values simplicity and privacy. IsoPack is a fully local-first, offline-ready application that ensures your packing lists are always with you, regardless of internet connectivity.
 
 ## Core Philosophy
 
