@@ -23,25 +23,25 @@ export default defineConfig(({mode}) => {
           start_url: '/',
           icons: [
             {
-              src: 'apple-touch-icon.png',
+              src: 'apple-touch-icon.png?v=3',
               sizes: '180x180',
               type: 'image/png',
               purpose: 'any'
             },
             {
-              src: 'apple-touch-icon.png',
+              src: 'apple-touch-icon.png?v=3',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any'
             },
             {
-              src: 'apple-touch-icon.png',
+              src: 'apple-touch-icon.png?v=3',
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any'
             },
             {
-              src: 'apple-touch-icon.png',
+              src: 'apple-touch-icon.png?v=3',
               sizes: 'any',
               type: 'image/png',
               purpose: 'maskable'
