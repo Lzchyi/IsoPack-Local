@@ -12,13 +12,14 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        injectRegister: 'inline',
         cleanupOutdatedCaches: true,
-        includeAssets: ['icon.png'],
+        includeAssets: ['app-icon.png'],
         filename: 'manifest.json',
         manifest: {
           name: 'IsoPack',
-          short_name: 'IsoPack',
-          version: '1.0.1',
+          short_name: 'IsoPack App',
+          version: '1.0.2',
           description: 'Offline-first travel packing assistant',
           theme_color: '#10b981',
           background_color: '#ffffff',
@@ -26,13 +27,13 @@ export default defineConfig(({mode}) => {
           start_url: '/',
           icons: [
             {
-              src: '/icon.png',
+              src: '/app-icon.png',
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any maskable'
             },
             {
-              src: '/icon.png',
+              src: '/app-icon.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any maskable'
@@ -41,6 +42,9 @@ export default defineConfig(({mode}) => {
         }
       })
     ],
+    build: {
+      chunkSizeWarningLimit: 1000,
+    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
