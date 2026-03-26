@@ -12,7 +12,7 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['logo.png'],
+        includeAssets: ['icon.png'],
         filename: 'manifest.json',
         manifest: {
           name: 'IsoPack',
@@ -24,19 +24,13 @@ export default defineConfig(({mode}) => {
           start_url: '/',
           icons: [
             {
-              src: '/logo.png?v=4',
-              sizes: '180x180',
-              type: 'image/png',
-              purpose: 'any maskable'
-            },
-            {
-              src: '/logo.png?v=4',
+              src: '/icon.png',
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any maskable'
             },
             {
-              src: '/logo.png?v=4',
+              src: '/icon.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any maskable'
