@@ -17,6 +17,7 @@ export default defineConfig(({mode}) => {
         manifest: {
           name: 'IsoPack',
           short_name: 'IsoPack',
+          version: '1.0.1',
           description: 'Offline-first travel packing assistant',
           theme_color: '#10b981',
           background_color: '#ffffff',
